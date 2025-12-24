@@ -4,12 +4,13 @@ import {
   registerCommand,
   runCommand,
 } from "./commands/commands";
-import { handlerLogin } from "./commands/users";
+import { handlerLogin, handlerRegister } from "./commands/users";
 
-function main() {
+async function main() {
   try {
     const registry: CommandsRegistry = {};
     registerCommand(registry, "login", handlerLogin);
+    registerCommand(registry, "register", handlerRegister);
 
     const [, , cmdName, ...args] = process.argv;
 
@@ -18,7 +19,8 @@ function main() {
       process.exit(1);
     }
 
-    runCommand(registry, cmdName, ...args);
+    await runCommand(registry, cmdName, ...args);
+    process.exit(0);
   } catch (err) {
     if (err instanceof Error) {
       // case: no config file
