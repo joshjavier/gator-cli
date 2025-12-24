@@ -1,4 +1,9 @@
 import { XMLParser } from "fast-xml-parser";
+import { PostgresError } from "postgres";
+import { readConfig } from "src/config";
+import { createFeed } from "src/lib/db/queries/feeds";
+import { getUser } from "src/lib/db/queries/users";
+import { Feed, User } from "src/lib/db/schema";
 
 type RSSFeed = {
   channel: {
@@ -74,4 +79,32 @@ export async function handlerAgg(cmdName: string) {
   // https://www.wagslane.dev/index.xml
   const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
   console.dir(rssFeed, { depth: null, colors: true });
+}
+
+export async function handlerAddFeed(cmdName: string, ...args: string[]) {
+  if (args.length < 2) {
+    throw new Error(`usage: ${cmdName} <name> <url>`);
+  }
+  const [name, url] = args;
+  const { currentUserName } = readConfig();
+
+  try {
+    const user = await getUser(currentUserName);
+    const feed = await createFeed(name, url, user.id);
+    printFeed(feed, user);
+  } catch (err) {
+    if (err instanceof Error) {
+      if ((err.cause as PostgresError).code === "23505") {
+        throw new Error("Feed with same URL already exists!");
+      }
+    }
+    throw err;
+  }
+}
+
+function printFeed(feed: Feed, user: User) {
+  console.log(`Feed ${feed.name} has been created.`);
+  console.log(` - URL: ${feed.url}`);
+  console.log(` - Created at: ${feed.createdAt.toDateString()}`);
+  console.log(` - Added by: ${user.name}`);
 }

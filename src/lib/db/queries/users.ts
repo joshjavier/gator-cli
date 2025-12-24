@@ -9,6 +9,11 @@ export async function createUser(name: string) {
 
 export async function getUser(name: string) {
   const [result] = await db.select().from(users).where(eq(users.name, name));
+  if (!result) {
+    throw new Error(
+      `User ${name} doesn't exist. Create a user with the 'register' command!`,
+    );
+  }
   return result;
 }
 

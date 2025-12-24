@@ -13,11 +13,6 @@ export async function handlerLogin(cmdName: string, ...args: string[]) {
   }
   const name = args[0];
   const user = await getUser(name);
-  if (!user) {
-    throw new Error(
-      `User ${name} doesn't exist. Create a user with the 'register' command!`,
-    );
-  }
   setUser(user.name);
   console.log(`You have logged in as ${name}.`);
 }
