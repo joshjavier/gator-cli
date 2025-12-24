@@ -1,6 +1,11 @@
 import { PostgresError } from "postgres";
-import { setUser } from "src/config";
-import { createUser, deleteAllUsers, getUser } from "src/lib/db/queries/users";
+import { readConfig, setUser } from "src/config";
+import {
+  createUser,
+  deleteAllUsers,
+  getUser,
+  getUsers,
+} from "src/lib/db/queries/users";
 
 export async function handlerLogin(cmdName: string, ...args: string[]) {
   if (args.length !== 1) {
@@ -44,4 +49,14 @@ export async function handlerRegister(cmdName: string, ...args: string[]) {
 export async function handlerReset(cmdName: string) {
   await deleteAllUsers();
   console.log("All users have been deleted from the database.");
+}
+
+export async function handlerUsers(cmdName: string) {
+  const users = await getUsers();
+  const { currentUserName } = readConfig();
+  for (const user of users) {
+    console.log(
+      `* ${user.name}${currentUserName === user.name ? " (current)" : ""}`,
+    );
+  }
 }
