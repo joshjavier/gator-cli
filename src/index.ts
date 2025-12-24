@@ -14,7 +14,7 @@ function main() {
       }
 
       // case: missing fields in config file
-      if (err.message.includes("missing fields")) {
+      if (err.message.includes("missing field(s)")) {
         console.log("Config error:", err.message);
         return;
       }
