@@ -1,4 +1,3 @@
-import process from "node:process";
 import {
   type CommandsRegistry,
   registerCommand,
@@ -10,6 +9,7 @@ import {
   handlerReset,
   handlerUsers,
 } from "./commands/users";
+import { handlerAgg } from "./commands/feeds";
 
 async function main() {
   try {
@@ -18,6 +18,7 @@ async function main() {
     registerCommand(registry, "register", handlerRegister);
     registerCommand(registry, "reset", handlerReset);
     registerCommand(registry, "users", handlerUsers);
+    registerCommand(registry, "agg", handlerAgg);
 
     const [, , cmdName, ...args] = process.argv;
 
