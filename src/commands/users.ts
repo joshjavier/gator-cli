@@ -1,3 +1,4 @@
+import { styleText } from "node:util";
 import { PostgresError } from "postgres";
 import { readConfig, setUser } from "src/config";
 import {
@@ -13,8 +14,20 @@ export async function handlerLogin(cmdName: string, ...args: string[]) {
   }
   const name = args[0];
   const user = await getUser(name);
+
+  if (!user) {
+    throw new Error(
+      styleText(
+        "yellow",
+        `User ${styleText("bold", name)} not found. Run the ${styleText("underline", "register")} command to create a new user.`,
+      ),
+    );
+  }
+
   setUser(user.name);
-  console.log(`You have logged in as ${name}.`);
+  console.log(
+    styleText("green", `You have logged in as ${styleText("bold", name)}.`),
+  );
 }
 
 export async function handlerRegister(cmdName: string, ...args: string[]) {

@@ -1,10 +1,9 @@
 import { XMLParser } from "fast-xml-parser";
+import { styleText } from "node:util";
 import { PostgresError } from "postgres";
-import { readConfig } from "src/config";
 import { createFeedFollow } from "src/lib/db/queries/feedFollows";
 import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
-import { getUser } from "src/lib/db/queries/users";
-import { Feed, User } from "src/lib/db/schema";
+import type { Feed, User } from "src/lib/db/schema";
 
 type RSSFeed = {
   channel: {
@@ -87,15 +86,17 @@ export async function handlerFeeds(cmdName: string) {
   console.table(feeds);
 }
 
-export async function handlerAddFeed(cmdName: string, ...args: string[]) {
+export async function handlerAddFeed(
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) {
   if (args.length < 2) {
     throw new Error(`usage: ${cmdName} <name> <url>`);
   }
   const [name, url] = args;
-  const { currentUserName } = readConfig();
 
   try {
-    const user = await getUser(currentUserName);
     const feed = await createFeed(name, url, user.id);
     printFeed(feed, user);
 
@@ -113,7 +114,7 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]) {
 }
 
 function printFeed(feed: Feed, user: User) {
-  console.log(`Feed ${feed.name} has been created.`);
+  console.log(styleText("green", `Feed ${feed.name} has been created.`));
   console.log(` - URL: ${feed.url}`);
   console.log(` - Created at: ${feed.createdAt.toDateString()}`);
   console.log(` - Added by: ${user.name}`);
