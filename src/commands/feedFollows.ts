@@ -1,6 +1,7 @@
 import { PostgresError } from "postgres";
 import {
   createFeedFollow,
+  deleteFeedFollow,
   getFeedFollowsForUser,
 } from "src/lib/db/queries/feedFollows";
 import { getFeed } from "src/lib/db/queries/feeds";
@@ -29,6 +30,21 @@ export async function handlerFollow(
     }
     throw err;
   }
+}
+
+export async function handlerUnfollow(
+  cmdName: string,
+  user: User,
+  ...args: string[]
+) {
+  if (args.length !== 1) {
+    throw new Error(`usage: ${cmdName} <feed_url>`);
+  }
+
+  const feedUrl = args[0];
+
+  const unfollowedFeed = await deleteFeedFollow(feedUrl, user.id);
+  console.log(`You have unfollowed ${unfollowedFeed.name}.`);
 }
 
 export async function handlerFollowing(cmdName: string, user: User) {

@@ -10,7 +10,11 @@ import {
   handlerUsers,
 } from "./commands/users";
 import { handlerAddFeed, handlerAgg, handlerFeeds } from "./commands/feeds";
-import { handlerFollow, handlerFollowing } from "./commands/feedFollows";
+import {
+  handlerFollow,
+  handlerFollowing,
+  handlerUnfollow,
+} from "./commands/feedFollows";
 import { middlewareLoggedIn } from "./lib/middleware";
 
 async function main() {
@@ -29,6 +33,7 @@ async function main() {
       "following",
       middlewareLoggedIn(handlerFollowing),
     );
+    registerCommand(registry, "unfollow", middlewareLoggedIn(handlerUnfollow));
 
     const [, , cmdName, ...args] = process.argv;
 
