@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { PostgresError } from "postgres";
 import { readConfig } from "src/config";
-import { createFeed } from "src/lib/db/queries/feeds";
+import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
 import { getUser } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
 
@@ -79,6 +79,11 @@ export async function handlerAgg(cmdName: string) {
   // https://www.wagslane.dev/index.xml
   const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
   console.dir(rssFeed, { depth: null, colors: true });
+}
+
+export async function handlerFeeds(cmdName: string) {
+  const feeds = await getFeeds();
+  console.table(feeds);
 }
 
 export async function handlerAddFeed(cmdName: string, ...args: string[]) {

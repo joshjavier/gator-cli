@@ -9,7 +9,7 @@ import {
   handlerReset,
   handlerUsers,
 } from "./commands/users";
-import { handlerAddFeed, handlerAgg } from "./commands/feeds";
+import { handlerAddFeed, handlerAgg, handlerFeeds } from "./commands/feeds";
 
 async function main() {
   try {
@@ -20,6 +20,7 @@ async function main() {
     registerCommand(registry, "users", handlerUsers);
     registerCommand(registry, "agg", handlerAgg);
     registerCommand(registry, "addfeed", handlerAddFeed);
+    registerCommand(registry, "feeds", handlerFeeds);
 
     const [, , cmdName, ...args] = process.argv;
 
