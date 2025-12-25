@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import { PostgresError } from "postgres";
 import { readConfig } from "src/config";
+import { createFeedFollow } from "src/lib/db/queries/feedFollows";
 import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
 import { getUser } from "src/lib/db/queries/users";
 import { Feed, User } from "src/lib/db/schema";
@@ -97,6 +98,10 @@ export async function handlerAddFeed(cmdName: string, ...args: string[]) {
     const user = await getUser(currentUserName);
     const feed = await createFeed(name, url, user.id);
     printFeed(feed, user);
+
+    // Automaticaly follow the newly created feed
+    const feedFollow = await createFeedFollow(feed.id, user.id);
+    console.log(`User ${user.name} is also following ${feed.name}.`);
   } catch (err) {
     if (err instanceof Error) {
       if ((err.cause as PostgresError).code === "23505") {
