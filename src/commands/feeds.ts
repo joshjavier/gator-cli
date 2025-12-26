@@ -2,8 +2,14 @@ import { XMLParser } from "fast-xml-parser";
 import { styleText } from "node:util";
 import { PostgresError } from "postgres";
 import { createFeedFollow } from "src/lib/db/queries/feedFollows";
-import { createFeed, getFeeds } from "src/lib/db/queries/feeds";
+import {
+  createFeed,
+  getFeeds,
+  getNextFeedToFetch,
+  markFeedFetched,
+} from "src/lib/db/queries/feeds";
 import type { Feed, User } from "src/lib/db/schema";
+import { parseDuration } from "src/lib/utils";
 
 type RSSFeed = {
   channel: {
@@ -74,11 +80,56 @@ async function fetchFeed(feedURL: string): Promise<RSSFeed> {
   };
 }
 
-export async function handlerAgg(cmdName: string) {
+export async function handlerAgg(cmdName: string, ...args: string[]) {
+  if (args.length !== 1) {
+    throw new Error(`usage: ${cmdName} <time_between_reqs>`);
+  }
+  const durationStr = args[0];
+  const timeBetweenRequests = parseDuration(durationStr);
+
+  console.log(`Collecting feeds every ${durationStr}...`);
+
+  const handleError = (err: unknown) => {
+    if (err instanceof Error) {
+      console.log("scrapeFeeds error:", err.message);
+      process.exit(1);
+    }
+    throw err;
+  };
+
+  scrapeFeeds().catch(handleError);
+
+  const interval = setInterval(() => {
+    scrapeFeeds().catch(handleError);
+  }, timeBetweenRequests);
+
+  await new Promise<void>((resolve) => {
+    process.on("SIGINT", () => {
+      console.log("Shutting down feed aggregator...");
+      clearInterval(interval);
+      resolve();
+    });
+  });
+
   // TODO: for now, fetch the feed below and console.log the entire object
   // https://www.wagslane.dev/index.xml
-  const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
-  console.dir(rssFeed, { depth: null, colors: true });
+  // const rssFeed = await fetchFeed("https://www.wagslane.dev/index.xml");
+  // console.dir(rssFeed, { depth: null, colors: true });
+}
+
+export async function scrapeFeeds() {
+  const feedToFetch = await getNextFeedToFetch();
+  await markFeedFetched(feedToFetch.id);
+  const rssFeed = await fetchFeed(feedToFetch.url);
+  console.log(
+    styleText(
+      "blue",
+      `\nFeed ${rssFeed.channel.title} has ${rssFeed.channel.item.length} items.`,
+    ),
+  );
+  for (const item of rssFeed.channel.item) {
+    console.log(` * ${item.title} - ${item.pubDate}`);
+  }
 }
 
 export async function handlerFeeds(cmdName: string) {
