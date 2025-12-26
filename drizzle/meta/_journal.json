@@ -29,6 +29,13 @@
       "when": 1766702719487,
       "tag": "0003_red_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766739714882,
+      "tag": "0004_sudden_shatterstar",
+      "breakpoints": true
     }
   ]
 }
