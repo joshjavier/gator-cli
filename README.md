@@ -4,7 +4,7 @@ A command-line RSS feed aggregator for managing feeds and browsing posts.
 
 ## Prerequisites
 
-- **Node.js** (v18 or higher recommended)
+- **Node.js** (v22 or higher recommended)
 - **PostgreSQL** (v18 or higher)
 - **npm** (comes with Node.js)
 
@@ -12,7 +12,7 @@ A command-line RSS feed aggregator for managing feeds and browsing posts.
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/joshjavier/gator-cli
 cd gator-cli
 ```
 
