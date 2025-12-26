@@ -9,13 +9,14 @@ import {
   handlerReset,
   handlerUsers,
 } from "./commands/users";
-import { handlerAddFeed, handlerAgg, handlerFeeds } from "./commands/feeds";
+import { handlerAddFeed, handlerFeeds } from "./commands/feeds";
 import {
   handlerFollow,
   handlerFollowing,
   handlerUnfollow,
 } from "./commands/feedFollows";
 import { middlewareLoggedIn } from "./lib/middleware";
+import { handlerAgg } from "./commands/aggregate";
 
 async function main() {
   try {
