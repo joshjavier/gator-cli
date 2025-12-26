@@ -1,5 +1,7 @@
 import { styleText } from "node:util";
+import { PostgresError } from "postgres";
 import { getNextFeedToFetch, markFeedFetched } from "src/lib/db/queries/feeds";
+import { createPost } from "src/lib/db/queries/posts";
 import type { Feed } from "src/lib/db/schema";
 import { fetchFeed } from "src/lib/rss";
 import { parseDuration } from "src/lib/utils";
@@ -35,18 +37,32 @@ export async function scrapeFeeds() {
     return;
   }
   console.log(styleText("green", "\nFound a feed to fetch!"));
-  scrapeFeed(feed);
+  await scrapeFeed(feed);
 }
 
 async function scrapeFeed(feed: Feed) {
   await markFeedFetched(feed.id);
   const feedData = await fetchFeed(feed.url);
+
   console.log(
     styleText(
       "blue",
       `Feed ${feedData.channel.title} collected, ${feedData.channel.item.length} items found`,
     ),
   );
+
+  try {
+    for (const item of feedData.channel.item) {
+      await createPost(item, feed.id);
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      if ((err.cause as PostgresError).code === "23505") {
+        throw new Error("trying to add a duplicate post");
+      }
+    }
+    throw err;
+  }
 }
 
 function handleError(err: unknown) {

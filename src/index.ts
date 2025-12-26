@@ -17,6 +17,7 @@ import {
 } from "./commands/feedFollows";
 import { middlewareLoggedIn } from "./lib/middleware";
 import { handlerAgg } from "./commands/aggregate";
+import { handlerBrowse } from "./commands/posts";
 
 async function main() {
   try {
@@ -35,6 +36,7 @@ async function main() {
       middlewareLoggedIn(handlerFollowing),
     );
     registerCommand(registry, "unfollow", middlewareLoggedIn(handlerUnfollow));
+    registerCommand(registry, "browse", middlewareLoggedIn(handlerBrowse));
 
     const [, , cmdName, ...args] = process.argv;
 
